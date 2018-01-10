@@ -14,7 +14,6 @@
 #include <SPI.h>         // needed for Arduino versions later than 0018
 #include <Ethernet.h>
 #include <EthernetUdp.h>         // UDP library from: bjoern@cs.stanford.edu 12/30/2008
-#include <Time.h>
 
 // Enter a MAC address and IP address for your controller below.
 // The IP address will be dependent on your local network:
@@ -22,7 +21,7 @@ byte mac[] = {
   0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED
 };
 IPAddress ip(192, 168, 1, 177);
-IPAddress sendIP(192, 168, 1, 65);
+IPAddress sendIP(192, 168, 1, 64);
 unsigned int localPort = 10001;      // local port to listen on
 unsigned int sendPort = 10002;      // local port to listen on
 const unsigned int SEND_MSG_SIZE = 6;
