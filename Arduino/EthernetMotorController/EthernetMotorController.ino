@@ -22,8 +22,11 @@
 #include <Ethernet.h>
 #include <EthernetUdp.h>         // UDP library from: bjoern@cs.stanford.edu 12/30/2008
 
+// Includes needed for PID
+#include <PID_v1.h>
+
 //*****************************************************  
-// Declare variables needed for Encoder reading 
+// Declare variables needed for Encoder reading
 int chipSelectPin1=10;
 int chipSelectPin2=9;
 int chipSelectPin3=8;
@@ -56,10 +59,31 @@ EthernetUDP Udp;
 unsigned long Time = 0; // 
 float value = 0;
 
+//*****************************************************  
+// Declare variables needed for PID controller
+bool enablePID = false;
+double motorJointRad[] = {0.0, 0.0, 0.0};
+double desiredJointRad[] = {0.0, 0.0, 0.0};
+double controlOuput[] = {0.0, 0.0, 0.0};
+double Kp[] = {2,2,2};
+double Ki[] = {0,0,0};
+double Kd[] = {0,0,0};
+// Specify the links and initial tuning parameters (PID Gains)
+// PID joint1PID(&Input, &Output, &Setpoint, Kp_gain, Ki_gain, Kd_gain, DIRECT);
+PID joint1PID(motorJointRad, controlOuput, desiredJointRad, Kp[0], Ki[0], Kd[0], DIRECT);
+PID joint2PID(motorJointRad+1, controlOuput+1, desiredJointRad+1, Kp[1], Ki[1], Kd[1], DIRECT);
+PID joint3PID(motorJointRad+2, controlOuput+2, desiredJointRad+2, Kp[2], Ki[2], Kd[2], DIRECT);
+//*****************************************************  
+
 //*****************************************************
 void setup() 
 //*****************************************************
 {
+  // setup the PID controllers
+  joint1PID.SetMode(AUTOMATIC);
+  joint2PID.SetMode(AUTOMATIC);
+  joint3PID.SetMode(AUTOMATIC);
+  
   // setup for Ethernet UDP
   Ethernet.begin(mac, ip);
   Udp.begin(localPort);
@@ -87,15 +111,39 @@ void loop()
 {
   // Encoder reading and motor angle calculation
     long encoderValue[3];
-    float motorJointRad[3];
     for (int i = 0; i < 3; i++) {
       encoderValue[i] = getEncoderValue(i); 
       motorJointRad[i] = (float)encoderValue[i]/(COUNT_PER_TURN[i]*QUAD_MODE[i]);
     }
   
+  // Receive command from master 
+    enablePID = true;
+    double udp_command[] = {0.0, 0.0, 0.0};
+    for (int i = 0; i < 3; i++) {
+      desiredJointRad[i] = udp_command[i];
+    }
     
+  // PID controller
+    if (enablePID){
+      // joint1PID.compute(); // the first axis is not using
+      joint2PID.Compute();
+      joint3PID.Compute();
+      }
 
-     delay(100); 
+  // Report the robot status via Ethernet
+    // send a reply to the IP address and port that sent us the packet we received
+    double DataToSend[] = {
+      motorJointRad[0], motorJointRad[1], motorJointRad[2],
+      controlOuput[0], controlOuput[1], controlOuput[2]
+    };
+    pack_UDP_message(SendBuffer,DataToSend);
+    Udp.beginPacket(sendIP, sendPort);
+    Udp.write(SendBuffer,sizeof(DataToSend));
+    Udp.endPacket();
+  
+  // Apply the computed control action to robot.
+  
+    delay(10); 
  
 }//end loop
 
@@ -197,14 +245,14 @@ void LS7366_Init(void)
 
 // pack UDP message to the buffer
 //*************************************************
-void pack_UDP_message(char * SendBuffer, const float DataToSend[SEND_MSG_SIZE])
+void pack_UDP_message(char * SendBuffer, const double DataToSend[SEND_MSG_SIZE])
 //*************************************************
 {
   // zero out the buffer
-  memset(SendBuffer, 0, SEND_MSG_SIZE*sizeof(float));
+  memset(SendBuffer, 0, SEND_MSG_SIZE*sizeof(double));
   for(int i=0; i<SEND_MSG_SIZE; i++)
   {
-    memcpy(SendBuffer+i*sizeof(float), &(DataToSend[i]), sizeof(float));
+    memcpy(SendBuffer+i*sizeof(double), DataToSend+i, sizeof(double));
   }
 }//end func
 
