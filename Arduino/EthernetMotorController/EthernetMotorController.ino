@@ -68,9 +68,11 @@ double controlOutput[] = {0.0, 0.0, 0.0}; // this is the analog voltage set
 const double CONTROL_MAX = 5.0;
 unsigned int controlWrite8Bit[3] = {0,0,0}; // this is the analog 8-bit number to write
 const unsigned int SABER_T_BIAS[] = {128, 128, 128}; // the middle point of sabertooth voltage.
-double Kp[] = {0.5,0.0,0.5};
-double Ki[] = {0,0,0};
-double Kd[] = {0,0,0};
+double Kp[] = {0, 0, 0.
+
+};
+double Ki[] = {0, 0, 0};
+double Kd[] = {0, 0, 0};
 // Specify the links and initial tuning parameters (PID Gains)
 // PID joint1PID(&Input, &Output, &Setpoint, Kp_gain, Ki_gain, Kd_gain, DIRECT);
 PID joint1PID(motorJointRad, controlOutput, desiredJointRad, Kp[0], Ki[0], Kd[0], DIRECT);
@@ -199,7 +201,7 @@ void loop()
   
   
   // Loop delay
-    delay(2);
+    delay(1);
    
 }//end loop
 
