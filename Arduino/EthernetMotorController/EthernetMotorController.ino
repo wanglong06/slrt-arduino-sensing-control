@@ -68,7 +68,7 @@ double controlOutput[] = {0.0, 0.0, 0.0}; // this is the analog voltage set
 const double CONTROL_MAX = 5.0;
 unsigned int controlWrite8Bit[3] = {0,0,0}; // this is the analog 8-bit number to write
 const unsigned int SABER_T_BIAS[] = {128, 128, 128}; // the middle point of sabertooth voltage.
-double Kp[] = {2,2,2};
+double Kp[] = {0.5,0.0,0.5};
 double Ki[] = {0,0,0};
 double Kd[] = {0,0,0};
 // Specify the links and initial tuning parameters (PID Gains)
@@ -163,6 +163,12 @@ void loop()
     //  convert controlOutput to analog write value
     for (int i=0; i<3; i++){
       controlWrite8Bit[i] = controlOutput[i] / CONTROL_MAX * 128 + SABER_T_BIAS[i];
+      if (controlWrite8Bit[i]>255){
+        controlWrite8Bit[i] = 255;
+        }
+      else if (controlWrite8Bit[i]<0){
+        controlWrite8Bit[i] = 0;
+        }
     }
     
     //  write to the pin
@@ -176,22 +182,24 @@ void loop()
     //    Serial.print(motorJointRad[0]);
     Serial.print("  q2: ");    
     Serial.print(motorJointRad[1]);
-    //    Serial.print("  q3: ");    
-    //    Serial.print(motorJointRad[2]);
+    Serial.print("  q3: ");    
+    Serial.print(motorJointRad[2]);
     //    Serial.print("  u1: ");  
     //    Serial.print(controlOutput[0]);
     Serial.print("  u2: ");  
     Serial.print(controlOutput[1]);
-    //    Serial.print("  u3: ");  
-    //    Serial.print(controlOutput[2]);
+    Serial.print("  u3: ");  
+    Serial.print(controlOutput[2]);
     Serial.print("  u2[8bit]:");
     Serial.print(controlWrite8Bit[1]);
+    Serial.print("  u3[8bit]:");
+    Serial.print(controlWrite8Bit[2]);
     Serial.print("\r\n");
     TimeIdx = TimeIdx + 1;
   
   
   // Loop delay
-    delay(10);
+    delay(2);
    
 }//end loop
 
