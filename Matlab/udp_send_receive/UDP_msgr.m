@@ -22,10 +22,10 @@ classdef UDP_msgr
         end
         function send(obj,data,format)
             if nargin<3
-                format = 'double';
+                format = 'float32';
             end
             % data = swapbytes(data);
-            fwrite(obj.udpOBJ,data,format);
+            fwrite(obj.udpOBJ,(data),format);
         end
         function data = receiveStringMsg(obj,dataArraySize)
             data  = char(fread(obj.udpOBJ,dataArraySize,'char'));
@@ -57,6 +57,14 @@ classdef UDP_msgr
                 data_unpacked(i) = typecast(data(start_i:start_i+3)','single');
             end
         end
+%         function data_packed = packUDP_Msg_double(data_double_numbers)
+%             dataLen = length(data_double_numbers);
+%             Msg_len = 
+%             for i = 1:dataLen
+%                 start_i = 1+(i-1)*4;
+%                 data_unpacked(i) = typecast(data(start_i:start_i+3)','single');
+%             end
+%         end
     end
     
 end

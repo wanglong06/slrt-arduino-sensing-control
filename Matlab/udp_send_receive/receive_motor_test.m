@@ -2,8 +2,11 @@ u = UDP_msgr('192.168.1.177',10001,10002);
 fprintf('\nReceiving data from Arduino ... \n')
 N=100;
 reverseStr = [];
+t0 = tic;
 while 1==1
     data = u.receiveDataMsg(6);
+    t = toc(t0);
+    u.send([0,1,0,1,2*sin(2*pi/10*t),1]);
     if ~isempty(data)
         msg = sprintf(...
             ' q1=%.2f,\n q2=%.2f,\n q3=%.2f,\n u1=%.2f,\n u2=%.2f,\n u3=%.2f,\n',...
