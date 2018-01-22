@@ -1,8 +1,7 @@
 /**
-  This code reads multiple VL6180X time of flight sensors using a multiplexer
-  Includes a combination of two sample codes from Adafruit:
-  - https://learn.adafruit.com/adafruit-tca9548a-1-to-8-i2c-multiplexer-breakout/wiring-and-test
-  - https://learn.adafruit.com/adafruit-vl6180x-time-of-flight-micro-lidar-distance-sensor-breakout/wiring-and-test
+  This code is used to read an a nxm array of VL180X time-of-flight sensors (where n = number of multiplexers, m = number of sensors per multiplexers). 
+  The maximum array size is 8x8. 
+  
   Colette Abah
   01/17/18
 */
@@ -17,6 +16,9 @@ Adafruit_VL6180X ToF_Sensors[8][8];
 uint8_t tca_addr[8];
 uint8_t default_tca_addr = 0x70;
 
+int j; int k; //j = multiplexer counter, k=sensor counter
+int N_mpx =  2; //Number of multiplexers
+int N_sensors = 4; //Number of sensors per multiplexer
 /*==========Initialize functions=============*/
 
 /*Function to select a port on a multiplexer*/
@@ -27,13 +29,12 @@ void tcaselect(uint8_t i, uint8_t address) {
   Wire.endTransmission();
 }
 
+/*Function to disable all the ports on a multiplexer*/
 void tca_disable(uint8_t address) {
   Wire.beginTransmission(address);
   Wire.write(0);  // no channel selected
   Wire.endTransmission();
 }
-
-
 
 void setup()
 {
@@ -47,9 +48,6 @@ void setup()
 
   //scan_i2c();
 
-  int j; int k;
-  int N_mpx =  2; //Number of multiplexers
-  int N_sensors = 4; //Number of sensors per multiplexer
 
   /*Create sensor objects based on the number of multiplexers and sensors*/
 
@@ -81,9 +79,6 @@ void setup()
 
 void loop()
 {
-  int j; int k;
-  int N_mpx =  2; //Number of multiplexers
-  int N_sensors = 4; //Number of sensors per multiplexer
   uint8_t range;
   uint8_t status;
 
@@ -105,33 +100,33 @@ void loop()
         continue;
       }
 
-              if  ((status >= VL6180X_ERROR_SYSERR_1) && (status <= VL6180X_ERROR_SYSERR_5)) {
-                Serial.println("System error");
-              }
-              else if (status == VL6180X_ERROR_ECEFAIL) {
-                Serial.println("ECE failure");
-              }
-              else if (status == VL6180X_ERROR_NOCONVERGE) {
-                Serial.println("No convergence");
-              }
-              else if (status == VL6180X_ERROR_RANGEIGNORE) {
-                Serial.println("Ignoring range");
-              }
-              else if (status == VL6180X_ERROR_SNR) {
-                Serial.println("Signal/Noise error");
-              }
-              else if (status == VL6180X_ERROR_RAWUFLOW) {
-                Serial.println("Raw reading underflow");
-              }
-              else if (status == VL6180X_ERROR_RAWOFLOW) {
-                Serial.println("Raw reading overflow");
-              }
-              else if (status == VL6180X_ERROR_RANGEUFLOW) {
-                Serial.println("Range reading underflow");
-              }
-              else if (status == VL6180X_ERROR_RANGEOFLOW) {
-                Serial.println("Range reading overflow");
-              }
+      if  ((status >= VL6180X_ERROR_SYSERR_1) && (status <= VL6180X_ERROR_SYSERR_5)) {
+        Serial.println("System error");
+      }
+      else if (status == VL6180X_ERROR_ECEFAIL) {
+        Serial.println("ECE failure");
+      }
+      else if (status == VL6180X_ERROR_NOCONVERGE) {
+        Serial.println("No convergence");
+      }
+      else if (status == VL6180X_ERROR_RANGEIGNORE) {
+        Serial.println("Ignoring range");
+      }
+      else if (status == VL6180X_ERROR_SNR) {
+        Serial.println("Signal/Noise error");
+      }
+      else if (status == VL6180X_ERROR_RAWUFLOW) {
+        Serial.println("Raw reading underflow");
+      }
+      else if (status == VL6180X_ERROR_RAWOFLOW) {
+        Serial.println("Raw reading overflow");
+      }
+      else if (status == VL6180X_ERROR_RANGEUFLOW) {
+        Serial.println("Range reading underflow");
+      }
+      else if (status == VL6180X_ERROR_RANGEOFLOW) {
+        Serial.println("Range reading overflow");
+      }
 
     }
 
