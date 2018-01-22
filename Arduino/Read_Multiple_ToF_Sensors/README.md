@@ -1,6 +1,6 @@
-# Time-of-Flight Sensing Array## Hardware *  Arduino Uno board
+# Time-of-Flight Sensing Array## Hardware *  Arduino Uno board
 *  Time-of-FLight Sensor: [ Adafruit VL6180X](https://learn.adafruit.com/adafruit-vl6180x-time-of-flight-micro-lidar-distance-sensor-breakout/overview)
 *  1-to-8 Multiplexer Breakout: [ Adafruit TCA9548A]( https://learn.adafruit.com/adafruit-tca9548a-1-to-8-i2c-multiplexer-breakout/overview)* Pull up resistors R = 4.7 Kilo Ohms (x2)
-## I2C CommunicationTo be updated ## Sample codes * [Sample code to read VL6180X](https://github.com/adafruit/Adafruit_VL6180X) 
+## Sample codes * [Sample code to read VL6180X](https://github.com/adafruit/Adafruit_VL6180X) 
 *  [Sample codes to scan the ports of a multiplexer](https://learn.adafruit.com/adafruit-tca9548a-1-to-8-i2c-multiplexer-breakout/wiring-and-test)
-*  [Sample code to scan the devices on an I2C bus](https://playground.arduino.cc/Main/I2cScanner)## Reading an array of time-of-flight Sensors This [code](https://github.com/wanglong06/slrt-arduino-sensing-control/blob/master/Arduino/Read_Multiple_ToF_Sensors/Read_Multiple_ToF_Sensors.ino) e# Soft Potentiometer sensing 
+*  [Sample code to scan the devices on an I2C bus](https://playground.arduino.cc/Main/I2cScanner)## Reading an array of time-of-flight Sensors This [code](https://github.com/wanglong06/slrt-arduino-sensing-control/blob/master/Arduino/Read_Multiple_ToF_Sensors/Read_Multiple_ToF_Sensors.ino) is used to read a nxm array of VL180X time-of-flight sensors (where n = number of multiplexers, m = number of sensors per multiplexers). The maximum array size is 8x8.   
