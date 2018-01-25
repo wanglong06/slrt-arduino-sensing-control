@@ -30,25 +30,36 @@ classdef UDP_msgr
         function data = receiveStringMsg(obj,dataArraySize)
             data  = char(fread(obj.udpOBJ,dataArraySize,'char'));
         end
-        function [data,received] = receiveDataMsg(obj,dataArraySize)
+        function [data,received] = receiveDataMsg(obj,dataArraySize,format)
             if nargin<2
                 dataArraySize = 1;
+            end
+            if nargin<3
+                format = 'single';
+            end
+            switch format
+                case 'single'
+                    BytePerValue = 4;
+                case 'uint8'
+                    BytePerValue = 1;
             end
             packet_READ = 0;
             data = [];
             while (obj.udpOBJ.BytesAvailable ~= 0)
                 packet_READ = 1;
-                data  = fread(obj.udpOBJ,4*dataArraySize);
+                data  = fread(obj.udpOBJ,BytePerValue*dataArraySize);
             end
             received = packet_READ*(length(data)==dataArraySize);
-            data = obj.unpackUDP_Msg(uint8(data));
+            if strcmp(format, 'single')
+                data = obj.unpackUDP_Msg_single(uint8(data));
+            end
         end
         function close(obj)
             fclose(obj.udpOBJ);
         end
     end
     methods (Static)
-        function data_unpacked = unpackUDP_Msg(data)
+        function data_unpacked = unpackUDP_Msg_single(data)
             %   Assuming the data is [4n x 1]
             dataLen = length(data)/4;
             data_unpacked = zeros(dataLen,1);
@@ -57,15 +68,6 @@ classdef UDP_msgr
                 data_unpacked(i) = typecast(data(start_i:start_i+3)','single');
             end
         end
-%         function data_packed = packUDP_Msg_double(data_double_numbers)
-%             dataLen = length(data_double_numbers);
-%             Msg_len = 
-%             for i = 1:dataLen
-%                 start_i = 1+(i-1)*4;
-%                 data_unpacked(i) = typecast(data(start_i:start_i+3)','single');
-%             end
-%         end
     end
-    
 end
 

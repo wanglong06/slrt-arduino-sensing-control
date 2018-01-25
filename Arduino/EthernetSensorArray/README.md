@@ -1,0 +1,1 @@
+# Using Ethernet to read proximity sensor arrya##	Matlab test script * Run ***Matlab\receive\_sensorArray\_test.m*** to receive the data from Adruino* Need to change the ip address in ***Arduino\EthernetSensorArray\EthernetSensorArray.ino***
