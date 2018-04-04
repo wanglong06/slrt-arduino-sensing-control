@@ -32,7 +32,7 @@
 #define MCP4725_ADDR 0x60 
 //*****************************************************  
 // Declare variables needed for Encoder reading
-int chipSelectPin1=10;
+int chipSelectPin1=7;
 int chipSelectPin2=9;
 int chipSelectPin3=8;
 const unsigned int COUNT_PER_TURN[] = {256,256,256}; // Encoder spec - counts per turn
@@ -74,7 +74,7 @@ const double CONTROL_MAX = 5.0;
 const int MAX_DIGIT = 4096;
 unsigned int controlWriteDAC[3] = {0,0,0}; // this is the analog 8-bit number to write
 const unsigned int SABER_T_BIAS[] = {2048, 2048, 2048}; // the middle point of sabertooth voltage.
-double Kp[] = {0, 2, 0};
+double Kp[] = {2, 2, 2};
 double Ki[] = {0, 0, 0};
 double Kd[] = {0, 0.0, 0};
 // Specify the links and initial tuning parameters (PID Gains)
