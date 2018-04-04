@@ -29,7 +29,28 @@
 
 // Include needed for i2c
 #include <Wire.h>//Include the Wire library to talk I2C
-#define MCP4725_ADDR 0x60 
+
+extern "C" { 
+#include "utility/twi.h"  // from Wire library, so we can do bus scanning
+}
+
+//I2C address of the TCA9548 multiplexer (Adafruit)
+#define TCAADDR 0x70
+
+//I2C device（DAC）addresses; will be auto-populated after scanning in setup()
+//0 if no device is connected to that port
+//The 3 DACs for the 3-axes MUST be connected to the multiplexer in ascending order
+//i.e. port # for X-axis < port # for Y-axis < port # for Z-axis
+uint8_t I2C_addr[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+
+//dynamic array containing the port numbers that have I2C devices connected to them on the multiplexer
+//will be populated after scanning in setup()
+uint8_t * muxPorts = 0;
+
+//number of I2C devices connected to the multiplexer
+//determined after scanning in setup()
+uint8_t deviceCount = 0;
+
 //*****************************************************  
 // Declare variables needed for Encoder reading
 int chipSelectPin1=7;
@@ -84,6 +105,16 @@ PID joint2PID(motorJointRad+1, controlOutput+1, desiredJointRad+1, Kp[1], Ki[1],
 PID joint3PID(motorJointRad+2, controlOutput+2, desiredJointRad+2, Kp[2], Ki[2], Kd[2], DIRECT);
 //*****************************************************  
 
+//*************************************************
+//function to select a port on the multiplexer
+void tcaselect(uint8_t i) {
+//*************************************************
+  if (i > 7) return;
+  Wire.beginTransmission(TCAADDR);
+  Wire.write(1 << i);
+  Wire.endTransmission();
+}
+
 //*****************************************************
 void setup() 
 //*****************************************************
@@ -124,6 +155,36 @@ void setup()
 
   delay(100);
 
+  //scan for I2C devices
+  Serial.println("Scanning for I2C devices connected to the multiplexer...");
+    
+  //for each of the 8 ports on the multiplexer
+  for(uint8_t t=0; t<8; t++) {
+    tcaselect(t);
+
+    //scan all possible I2C address values
+    for(uint8_t addr = 0; addr<=127; addr++) {
+      if (addr == TCAADDR) continue;
+      
+      uint8_t data;
+      if(! twi_writeTo(addr, &data, 0, 1, 1) && addr != 0) {
+         I2C_addr[t] = addr;
+         deviceCount++;
+      }
+    }
+  }
+  
+  muxPorts = new uint8_t [deviceCount];
+  uint8_t j = 0;
+  for(uint8_t i=0; i<8; i++){
+    if(I2C_addr[i] != 0){
+      muxPorts[j] = i;
+      j++;
+    }
+  }
+  for(uint8_t i=0; i<deviceCount; i++){
+    Serial.println("TCA Port #" + String(muxPorts[i]+1) + ": 0x" + String(I2C_addr[muxPorts[i]],HEX));
+  }
 }
 
 //*****************************************************
@@ -193,11 +254,15 @@ void loop()
     }
     
     //  write to the pin
-      Wire.beginTransmission(MCP4725_ADDR);
-      Wire.write(64);                     // cmd to update the DAC
-      Wire.write(controlWriteDAC[1] >> 4);        // the 8 most significant bits...
-      Wire.write((controlWriteDAC[1] & 15) << 4); // the 4 least significant bits...
+    // if there are more than 3 I2C devices on the multiplexer, only iterate through the 1st 3
+    for(uint8_t i=0; i< min(deviceCount, 3); i++){
+      tcaselect(muxPorts[i]);
+      Wire.beginTransmission(I2C_addr[muxPorts[i]]);
+      Wire.write(64);                             // cmd to update the DAC
+      Wire.write(controlWriteDAC[i] >> 4);        // the 8 most significant bits...
+      Wire.write((controlWriteDAC[i] & 15) << 4); // the 4 least significant bits...
       Wire.endTransmission();
+    }
   
   // Display the status for debugging purposes
 //    //    Serial.print("q1: ");    
