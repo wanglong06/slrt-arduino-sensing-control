@@ -18,6 +18,7 @@ This repo is part of an ongoing [development of a wrist](https://docs.google.com
 * Analog write option 1: (PWM set) ([doc](https://www.arduino.cc/reference/en/language/functions/analog-io/analogwrite/)). Also, for the Sabertooth amplifier, one needs an [RC filter](http://www.instructables.com/id/Analog-Output-Convert-PWM-to-Voltage/). 
 * Analog write option 2: (DAC) [MCP4725](https://learn.adafruit.com/mcp4725-12-bit-dac-tutorial?view=all)
 * Amplifier: currently we are using [Sabertooth 2x25 2007](https://www.dimensionengineering.com/datasheets/Sabertooth2x25.pdf). Newer version [Sabertooth 2x25 V2](https://www.dimensionengineering.com/datasheets/Sabertooth2x25v2.pdf) should also work.
+* PCB integration of 3-axes D/A channels, please refer to Seonghoon Noh's folder named ***Parker\_wrist\_DAC\_board***.
 
 #### Sensor Interface ####
 
