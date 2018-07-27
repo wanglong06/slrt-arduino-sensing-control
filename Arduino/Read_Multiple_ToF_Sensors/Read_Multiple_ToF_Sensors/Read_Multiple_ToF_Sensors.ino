@@ -92,7 +92,7 @@ void loop()
   uint8_t range[N_mpx][N_sensors];
   uint8_t status[N_mpx][N_sensors];
   uint8_t cur_sensor_id = 8;
-  uint8_t mode; //MODE = 0: Output the reading from sensor "cur_sensor_id" This mode is useful for debugging.  MODE 1: Output all the sensor readings
+  uint8_t mode=0; //MODE = 0: Output the reading from sensor "cur_sensor_id" This mode is useful for debugging.  MODE 1: Output all the sensor readings
 
   for (j = 0; j < N_mpx; j++) {
     for (k = 0; k < N_sensors; k++) {
