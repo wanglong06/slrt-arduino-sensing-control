@@ -92,12 +92,12 @@ void loop()
   uint8_t range[N_mpx][N_sensors];
   uint8_t status[N_mpx][N_sensors];
   uint8_t cur_sensor_id = 8;
-  uint8_t mode=0; //MODE = 0: Output the reading from sensor "cur_sensor_id" This mode is useful for debugging.  MODE 1: Output all the sensor readings
+  uint8_t mode = 1;
+  //MODE = 0: Output the reading from sensor "cur_sensor_id" [[SENSOR DEBUGGING MODE]].
+  //MODE 1: Output all the sensor readings
 
   for (j = 0; j < N_mpx; j++) {
     for (k = 0; k < N_sensors; k++) {
-      //float lux = ToF_Sensors[j][k].readLux(VL6180X_ALS_GAIN_5);
-      //Serial.print("Lux: "); Serial.println(lux);
 
       tca_disable (tca_addr[j]); //Turn off all ports
       tcaselect(k,  tca_addr[j]); // Transmit to port k on multiplexer j
@@ -105,56 +105,24 @@ void loop()
       range[j][k] = ToF_Sensors[j][k].readRange();
       status[j][k] = ToF_Sensors[j][k].readRangeStatus();
 
-      if (mode == 0) {
+
+  /*----------------------------------------------------------------*/
+  /*       MODE 0: Output the reading from one particular sensor    */
+  /*---------------------------------------------------------------*/
+
+      if (mode == 0) { 
         if (k + 1 == cur_sensor_id) {
-          // If NO error, print out the distance from the obstacle!
-          if (status[j][k] == VL6180X_ERROR_NONE) {
-            Serial.print("[Mux "); Serial.print(j + 1);  Serial.print(", Sensor "); Serial.print(k + 1); Serial.print("] : ");
-            Serial.print(range[j][k]); Serial.println(" mm");
-
-            continue;
-          }
-
-          // Some error occurred, print it out!
-
-          if  ((status[j][k] >= VL6180X_ERROR_SYSERR_1) && (status[j][k] <= VL6180X_ERROR_SYSERR_5)) {
-            Serial.print("[Mux "); Serial.print(j + 1);  Serial.print(", Sensor "); Serial.print(k + 1); Serial.print("] : ");
-            Serial.println("System error");
-          }
-          else if (status[j][k] == VL6180X_ERROR_ECEFAIL) {
-            Serial.print("[Mux "); Serial.print(j + 1);  Serial.print(", Sensor "); Serial.print(k + 1); Serial.print("] : ");
-            Serial.println("ECE failure");
-          }
-          else if (status[j][k] == VL6180X_ERROR_NOCONVERGE) {
-            Serial.print("[Mux "); Serial.print(j + 1);  Serial.print(", Sensor "); Serial.print(k + 1); Serial.print("] : ");
-            Serial.println("No convergence");
-          }
-          else if (status[j][k] == VL6180X_ERROR_RANGEIGNORE) {
-            Serial.print("[Mux "); Serial.print(j + 1);  Serial.print(", Sensor "); Serial.print(k + 1); Serial.print("] : ");
-            Serial.println("Ignoring range");
-          }
-          else if (status[j][k] == VL6180X_ERROR_SNR) {
-            Serial.print("[Mux "); Serial.print(j + 1);  Serial.print(", Sensor "); Serial.print(k + 1); Serial.print("] : ");
-            Serial.println("Signal/Noise error");
-          }
-          else if (status[j][k] == VL6180X_ERROR_RAWUFLOW) {
-            Serial.print("[Mux "); Serial.print(j + 1);  Serial.print(", Sensor "); Serial.print(k + 1); Serial.print("] : ");
-            Serial.println("Raw reading underflow");
-          }
-          else if (status[j][k] == VL6180X_ERROR_RAWOFLOW) {
-            Serial.print("[Mux "); Serial.print(j + 1);  Serial.print(", Sensor "); Serial.print(k + 1); Serial.print("] : ");
-            Serial.println("Raw reading overflow");
-          }
-          else if (status[j][k] == VL6180X_ERROR_RANGEUFLOW) {
-            Serial.print("[Mux "); Serial.print(j + 1);  Serial.print(", Sensor "); Serial.print(k + 1); Serial.print("] : ");
-            Serial.println("Range reading underflow");
-          }
-          else if (status[j][k] == VL6180X_ERROR_RANGEOFLOW) {
-            Serial.print("[Mux "); Serial.print(j + 1);  Serial.print(", Sensor "); Serial.print(k + 1); Serial.print("] : ");
-            Serial.println("Range reading overflow");
-          }
-
+          Print_VL6180X_Reading(j, k,  status[j][k], range[j][k]);
         }
+
+  /*----------------------------------------------------------------*/
+  /*       MODE 1: Output readings from all sensors    */
+  /*---------------------------------------------------------------*/
+
+      }
+      else {
+        Print_VL6180X_Reading(j, k,  status[j][k], range[j][k]);
+
       }
     }
 
@@ -190,60 +158,60 @@ void tca_disable(uint8_t address) {
 /*----------------------------------------------------------------------*/
 /*          Function to read a VL6180X*/
 /*----------------------------------------------------------------------*/
-//void Print_VL6180X_Reading(uint8_t mpx_index, uint8_t sensor_index,  uint8_t sensor_status, uint8_t sensor_reading) {
-////  if (status[j][k] == VL6180X_ERROR_NONE) {
-////    Serial.print("[Mux "); Serial.print(j + 1);  Serial.print(", Sensor "); Serial.print(k + 1); Serial.print("] : ");
-////    Serial.print(range[j][k]); Serial.println(" mm");
-////
-////    continue;
-////  }
-//
-//  if (sensor_status == VL6180X_ERROR_NONE) {
-//    Serial.print("[Mux "); Serial.print(mpx_index + 1);  Serial.print(", Sensor "); Serial.print(sensor_index + 1); Serial.print("] : ");
-//    Serial.print(sensor_reading); Serial.println(" mm");
-//
-//    //continue;
-//  }
-//
-//  // Some error occurred, print it out!
-//
-//  if  ((sensor_status >= VL6180X_ERROR_SYSERR_1) && (sensor_status <= VL6180X_ERROR_SYSERR_5)) {
-//    Serial.print("[Mux "); Serial.print(mpx_index + 1);  Serial.print(", Sensor "); Serial.print(sensor_index + 1); Serial.print("] : ");
-//    Serial.println("System error");
-//  }
-//  else if (sensor_status == VL6180X_ERROR_ECEFAIL) {
-//    Serial.print("[Mux "); Serial.print(mpx_index + 1);  Serial.print(", Sensor "); Serial.print(sensor_index + 1); Serial.print("] : ");
-//    Serial.println("ECE failure");
-//  }
-//  else if (sensor_status == VL6180X_ERROR_NOCONVERGE) {
-//    Serial.print("[Mux "); Serial.print(mpx_index + 1);  Serial.print(", Sensor "); Serial.print(sensor_index + 1); Serial.print("] : ");
-//    Serial.println("No convergence");
-//  }
-//  else if (sensor_status == VL6180X_ERROR_RANGEIGNORE) {
-//    Serial.print("[Mux "); Serial.print(mpx_index + 1);  Serial.print(", Sensor "); Serial.print(sensor_index + 1); Serial.print("] : ");
-//    Serial.println("Ignoring range");
-//  }
-//  else if (sensor_status == VL6180X_ERROR_SNR) {
-//    Serial.print("[Mux "); Serial.print(mpx_index + 1);  Serial.print(", Sensor "); Serial.print(sensor_index + 1); Serial.print("] : ");
-//    Serial.println("Signal/Noise error");
-//  }
-//  else if (sensor_status == VL6180X_ERROR_RAWUFLOW) {
-//    Serial.print("[Mux "); Serial.print(mpx_index + 1);  Serial.print(", Sensor "); Serial.print(sensor_index + 1); Serial.print("] : ");
-//    Serial.println("Raw reading underflow");
-//  }
-//  else if (sensor_status == VL6180X_ERROR_RAWOFLOW) {
-//    Serial.print("[Mux "); Serial.print(mpx_index + 1);  Serial.print(", Sensor "); Serial.print(sensor_index + 1); Serial.print("] : ");
-//    Serial.println("Raw reading overflow");
-//  }
-//  else if (sensor_status == VL6180X_ERROR_RANGEUFLOW) {
-//    Serial.print("[Mux "); Serial.print(mpx_index + 1);  Serial.print(", Sensor "); Serial.print(sensor_index + 1); Serial.print("] : ");
-//    Serial.println("Range reading underflow");
-//  }
-//  else if (sensor_status == VL6180X_ERROR_RANGEOFLOW) {
-//    Serial.print("[Mux "); Serial.print(mpx_index + 1);  Serial.print(", Sensor "); Serial.print(sensor_index + 1); Serial.print("] : ");
-//    Serial.println("Range reading overflow");
-//  }
-//}
+void Print_VL6180X_Reading(uint8_t mpx_index, uint8_t sensor_index,  uint8_t sensor_status, uint8_t sensor_reading) {
+  //  if (status[j][k] == VL6180X_ERROR_NONE) {
+  //    Serial.print("[Mux "); Serial.print(j + 1);  Serial.print(", Sensor "); Serial.print(k + 1); Serial.print("] : ");
+  //    Serial.print(range[j][k]); Serial.println(" mm");
+  //
+  //    continue;
+  //  }
+
+  if (sensor_status == VL6180X_ERROR_NONE) {
+    Serial.print("[Mux "); Serial.print(mpx_index + 1);  Serial.print(", Sensor "); Serial.print(sensor_index + 1); Serial.print("] : ");
+    Serial.print(sensor_reading); Serial.println(" mm");
+
+    //continue;
+  }
+
+  // Some error occurred, print it out!
+
+  if  ((sensor_status >= VL6180X_ERROR_SYSERR_1) && (sensor_status <= VL6180X_ERROR_SYSERR_5)) {
+    Serial.print("[Mux "); Serial.print(mpx_index + 1);  Serial.print(", Sensor "); Serial.print(sensor_index + 1); Serial.print("] : ");
+    Serial.println("System error");
+  }
+  else if (sensor_status == VL6180X_ERROR_ECEFAIL) {
+    Serial.print("[Mux "); Serial.print(mpx_index + 1);  Serial.print(", Sensor "); Serial.print(sensor_index + 1); Serial.print("] : ");
+    Serial.println("ECE failure");
+  }
+  else if (sensor_status == VL6180X_ERROR_NOCONVERGE) {
+    Serial.print("[Mux "); Serial.print(mpx_index + 1);  Serial.print(", Sensor "); Serial.print(sensor_index + 1); Serial.print("] : ");
+    Serial.println("No convergence");
+  }
+  else if (sensor_status == VL6180X_ERROR_RANGEIGNORE) {
+    Serial.print("[Mux "); Serial.print(mpx_index + 1);  Serial.print(", Sensor "); Serial.print(sensor_index + 1); Serial.print("] : ");
+    Serial.println("Ignoring range");
+  }
+  else if (sensor_status == VL6180X_ERROR_SNR) {
+    Serial.print("[Mux "); Serial.print(mpx_index + 1);  Serial.print(", Sensor "); Serial.print(sensor_index + 1); Serial.print("] : ");
+    Serial.println("Signal/Noise error");
+  }
+  else if (sensor_status == VL6180X_ERROR_RAWUFLOW) {
+    Serial.print("[Mux "); Serial.print(mpx_index + 1);  Serial.print(", Sensor "); Serial.print(sensor_index + 1); Serial.print("] : ");
+    Serial.println("Raw reading underflow");
+  }
+  else if (sensor_status == VL6180X_ERROR_RAWOFLOW) {
+    Serial.print("[Mux "); Serial.print(mpx_index + 1);  Serial.print(", Sensor "); Serial.print(sensor_index + 1); Serial.print("] : ");
+    Serial.println("Raw reading overflow");
+  }
+  else if (sensor_status == VL6180X_ERROR_RANGEUFLOW) {
+    Serial.print("[Mux "); Serial.print(mpx_index + 1);  Serial.print(", Sensor "); Serial.print(sensor_index + 1); Serial.print("] : ");
+    Serial.println("Range reading underflow");
+  }
+  else if (sensor_status == VL6180X_ERROR_RANGEOFLOW) {
+    Serial.print("[Mux "); Serial.print(mpx_index + 1);  Serial.print(", Sensor "); Serial.print(sensor_index + 1); Serial.print("] : ");
+    Serial.println("Range reading overflow");
+  }
+}
 
 
 /*Function to scan the I2C bus*/
